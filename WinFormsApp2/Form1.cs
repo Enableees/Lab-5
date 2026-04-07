@@ -4,9 +4,11 @@ namespace WinFormsApp2
 {
     public partial class Form1 : Form
     {
+        MyRectangle myRect;
         List<BaseObject> objects = new();
         Player player;
         Marker marker;
+        RedCircle redCircle;
         List<GreenBall> greenBalls = new();
         int result = 0;
 
@@ -40,13 +42,21 @@ namespace WinFormsApp2
                 objects.Add(ball);
             }
 
+            redCircle = new RedCircle(
+                rnd.Next(50, pbMain.Width - 50),
+                rnd.Next(50, pbMain.Height - 50),
+                0,
+                pbMain.Width,
+                pbMain.Height
+            );
+            objects.Add(redCircle);
+
             marker = new Marker(pbMain.Width / 2 + 50, pbMain.Height / 2 + 50, 0);
             objects.Add(marker);
             objects.Add(player);
 
             label1.Text = "Результат: 0";
         }
-
         private void pbMain_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
@@ -66,7 +76,15 @@ namespace WinFormsApp2
                         ball.Respawn();
                         result++;
                         label1.Text = $"Результат: {result}";
-                        txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] Результат: {result}\n" + txtLog.Text;
+                        txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] +1 очко! Всего: {result}\n" + txtLog.Text;
+                    }
+
+                    if (obj == redCircle)
+                    {
+                        result--;
+                        label1.Text = $"Результат: {result}";
+                        redCircle.Respawn();
+                        txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] -1 очко! Всего: {result}\n" + txtLog.Text;
                     }
                 }
             }
@@ -77,7 +95,6 @@ namespace WinFormsApp2
                 obj.Render(g);
             }
         }
-
         private void updatePlayer()
         {
             if (marker != null)
@@ -103,6 +120,10 @@ namespace WinFormsApp2
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (redCircle != null)
+            {
+                redCircle.IncreaseSize();
+            }
             pbMain.Invalidate();
         }
 
