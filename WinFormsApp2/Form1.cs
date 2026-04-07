@@ -4,13 +4,12 @@ namespace WinFormsApp2
 {
     public partial class Form1 : Form
     {
-        MyRectangle myRect;
         List<BaseObject> objects = new();
         Player player;
         Marker marker;
         RedCircle redCircle;
-        List<GreenBall> greenBalls = new();
         int result = 0;
+        Random rnd = new Random();
 
         public Form1()
         {
@@ -20,6 +19,23 @@ namespace WinFormsApp2
             player.OnOverlap += (p, obj) =>
             {
                 txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] Игрок пересекся с {obj}\n" + txtLog.Text;
+                if (obj is GreenBall ball)
+                {
+                    objects.Remove(ball);
+                    result++;
+                    label1.Text = $"Результат: {result}";
+                    txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] +1 очко! Всего: {result}\n" + txtLog.Text;
+                    CreateGreenBall();
+                }
+
+                if (obj == redCircle)
+                {
+                    objects.Remove(redCircle);
+                    result--;
+                    label1.Text = $"Результат: {result}";
+                    txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] -1 очко! Всего: {result}\n" + txtLog.Text;
+                    CreateRedCircle();
+                }
             };
 
             player.OnMarkerOverlap += (m) =>
@@ -28,34 +44,37 @@ namespace WinFormsApp2
                 marker = null;
             };
 
-            Random rnd = new Random();
             for (int i = 0; i < 3; i++)
             {
-                GreenBall ball = new GreenBall(
-                    rnd.Next(50, pbMain.Width - 50),
-                    rnd.Next(50, pbMain.Height - 50),
-                    0,
-                    pbMain.Width,
-                    pbMain.Height
-                );
-                greenBalls.Add(ball);
-                objects.Add(ball);
+                CreateGreenBall();
             }
 
-            redCircle = new RedCircle(
-                rnd.Next(50, pbMain.Width - 50),
-                rnd.Next(50, pbMain.Height - 50),
-                0,
-                pbMain.Width,
-                pbMain.Height
-            );
-            objects.Add(redCircle);
+            CreateRedCircle();
 
             marker = new Marker(pbMain.Width / 2 + 50, pbMain.Height / 2 + 50, 0);
             objects.Add(marker);
             objects.Add(player);
 
             label1.Text = "Результат: 0";
+        }
+        private void CreateGreenBall()
+        {
+            GreenBall ball = new GreenBall(
+                rnd.Next(50, pbMain.Width - 50),
+                rnd.Next(50, pbMain.Height - 50),
+                0
+            );
+            objects.Add(ball);
+        }
+
+        private void CreateRedCircle()
+        {
+            redCircle = new RedCircle(
+                rnd.Next(50, pbMain.Width - 50),
+                rnd.Next(50, pbMain.Height - 50),
+                0
+            );
+            objects.Add(redCircle);
         }
         private void pbMain_Paint(object sender, PaintEventArgs e)
         {
@@ -70,22 +89,6 @@ namespace WinFormsApp2
                 {
                     player.Overlap(obj);
                     obj.Overlap(player);
-
-                    if (obj is GreenBall ball)
-                    {
-                        ball.Respawn();
-                        result++;
-                        label1.Text = $"Результат: {result}";
-                        txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] +1 очко! Всего: {result}\n" + txtLog.Text;
-                    }
-
-                    if (obj == redCircle)
-                    {
-                        result--;
-                        label1.Text = $"Результат: {result}";
-                        redCircle.Respawn();
-                        txtLog.Text = $"[{DateTime.Now:HH:mm:ss:ff}] -1 очко! Всего: {result}\n" + txtLog.Text;
-                    }
                 }
             }
 
@@ -120,10 +123,6 @@ namespace WinFormsApp2
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (redCircle != null)
-            {
-                redCircle.IncreaseSize();
-            }
             pbMain.Invalidate();
         }
 

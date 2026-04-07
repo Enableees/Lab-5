@@ -7,13 +7,9 @@ namespace WinFormsApp2.Objects
     class GreenBall : BaseObject
     {
         public Random rnd = new Random();
-        public int widthForm;
-        public int heightForm;
 
-        public GreenBall(float x, float y, float angle, int width, int height) : base(x, y, angle)
+        public GreenBall(float x, float y, float angle) : base(x, y, angle)
         {
-            widthForm = width;
-            heightForm = height;
         }
 
         public override void Render(Graphics g)
@@ -27,12 +23,6 @@ namespace WinFormsApp2.Objects
             var path = base.GetGraphicsPath();
             path.AddEllipse(-15, -15, 30, 30);
             return path;
-        }
-
-        public void Respawn()
-        {
-            X = rnd.Next(50, widthForm - 50);
-            Y = rnd.Next(50, heightForm - 50);
         }
     }
 }
